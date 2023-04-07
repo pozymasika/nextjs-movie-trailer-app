@@ -1,37 +1,29 @@
 import { useState, useEffect } from "react";
 import { API_PATH, API_KEY, IMG_API_PATH } from "@/constants";
-import YoutubeTrailer from "./YoutubeTrailer";
 import styles from "@/styles/Movies.module.css";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+const YoutubeTrailer = dynamic(() => import("./YoutubeTrailer"), {
+  ssr: false,
+});
 
-export default function MovieCard({ movie }) {
-  const { title, poster_path, overview, vote_average } = movie;
-  const [trailerLinkId, setTrailerLinkId] = useState("");
-
-  useEffect(() => {
-    const fetchTrailer = async () => {
-      try {
-        const response = await fetch(
-          `${API_PATH}/movie/${movie.id}/videos?api_key=${API_KEY}&language=en-US`
-        );
-        const data = await response.json();
-        const trailer = data.results.find((video) => video.type === "Trailer");
-        if (trailer) {
-          setTrailerLinkId(trailer.key);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchTrailer();
-  }, [movie.id]);
+export default function MovieCard({ movie, priority }) {
+  const { title, poster_path, overview, vote_average, trailerLinkId } = movie;
 
   return (
     <div className="card mb-4">
       <div className={styles.poster}>
-        <img
+        <Image
           src={IMG_API_PATH + poster_path}
           alt={title}
           className={"card-img-top " + styles.posterImage}
+          width={304}
+          height={171}
+          style={{
+            objectFit: "cover",
+            objectPosition: "top",
+          }}
+          priority={priority}
         />
         {trailerLinkId && (
           <YoutubeTrailer

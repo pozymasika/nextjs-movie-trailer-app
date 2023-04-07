@@ -12,6 +12,10 @@
   );
 }
 
+.poster img {
+  max-width: 100%;
+}
+
 .desc {
   overflow: hidden;
   text-overflow: ellipsis;

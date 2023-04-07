@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "@/styles/Movies.module.css";
 
 export default function YoutubeTrailer({ trailerLinkId, className = "" }) {
   const [player, setPlayer] = useState(null);
   const playerId = "player-" + trailerLinkId;
+  const playerRef = useRef(null);
 
-  useEffect(() => {
+  function initPlayer() {
     if (!window.YT) {
       return;
     }
@@ -37,6 +38,22 @@ export default function YoutubeTrailer({ trailerLinkId, className = "" }) {
         },
       });
     });
+  }
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          initPlayer();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(playerRef.current);
+    return () => {
+      observer.disconnect();
+    };
   }, [trailerLinkId]);
 
   return (
@@ -44,11 +61,10 @@ export default function YoutubeTrailer({ trailerLinkId, className = "" }) {
       className={`${className} ${styles.trailer}`}
       onMouseOver={() => player?.playVideo()}
       onMouseOut={() => player?.pauseVideo()}>
-      <iframe
+      <div
         className="w-100 h-100"
         id={"player-" + trailerLinkId}
-        src={`https://www.youtube.com/embed/${trailerLinkId}?enablejsapi=1`}
-        frameBorder="0"
+        ref={playerRef}
       />
     </div>
   );
